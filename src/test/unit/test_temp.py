@@ -1,4 +1,2 @@
-import pytest
-
-def test():
+def test() -> None:
     pass
