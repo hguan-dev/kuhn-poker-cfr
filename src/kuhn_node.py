@@ -9,13 +9,13 @@ r: float = random.random()
 
 class KuhnNode:
     def __init__(self) -> None:
-        self.infoSet: str = ''
+        self.infoSet: str = ""
         self.regretSum: List[float] = [0.0] * NUM_ACTIONS
         self.strategy: List[float] = [0.0] * NUM_ACTIONS
         self.strategySum: List[float] = [0.0] * NUM_ACTIONS
 
     def __str__(self) -> str:
-        return self.infoSet + ' ' + ', '.join(str(e) for e in self.getAverageStrategy())
+        return self.infoSet + " " + ", ".join(str(e) for e in self.getAverageStrategy())
 
     def getStrategy(self, realization_weight: float) -> List[float]:
         """
@@ -87,12 +87,12 @@ class KuhnNode:
 
         # Return payoff for terminal states
         if plays > 1:
-            terminalPass: bool = history[plays - 1] == 'p'
-            doubleBet: bool = history[plays - 2:] == 'bb'
+            terminalPass: bool = history[plays - 1] == "p"
+            doubleBet: bool = history[plays - 2 :] == "bb"
             isPlayerCardHigher: bool = cards[curr_player] > cards[opponent]
 
             if terminalPass:
-                if history == 'pp':
+                if history == "pp":
                     return 1 if isPlayerCardHigher else -1
                 # History is 'pbp' or 'bp'
                 return 1
@@ -101,4 +101,3 @@ class KuhnNode:
                 return 2 if isPlayerCardHigher else -2
 
         return None
-

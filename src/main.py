@@ -1,4 +1,3 @@
-import time
 from kuhn_game import KuhnGame
 from kuhn_test import KuhnTest
 from kuhn_trainer import train, nodeMap
@@ -18,4 +17,3 @@ print("Exploitability:", kt.exploitability())
 game = KuhnGame()
 game.AI = nodeMap  # Assign the trained strategy directly
 game.playAI(go_first=False, bankroll=0)
-

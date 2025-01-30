@@ -1,9 +1,6 @@
-import random
 from typing import List, Dict
 from kuhn_node import KuhnNode
-import pickle
 import time
-from kuhn_test import KuhnTest
 
 NUM_ACTIONS: int = 2
 nodeMap: Dict[str, KuhnNode] = {}
@@ -45,11 +42,10 @@ def train(iterations: int, saveName: str) -> None:
     pass
 
 
-
 def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     """
     Counterfactual Regret Minimization (CFR) algorithm.
-    
+
     TODO:
     - Compute the utility for each possible action.
     - Update the regrets for the current information set.
@@ -66,8 +62,8 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     # TODO: Update regrets based on the utilities.
     pass
 
-if __name__ == '__main__':
-    start_time: float = time.time()
-    train(10 ** 6, "kt-10")
-    print("--- %s seconds ---" % (time.time() - start_time))
 
+if __name__ == "__main__":
+    start_time: float = time.time()
+    train(10**6, "kt-10")
+    print("--- %s seconds ---" % (time.time() - start_time))
