@@ -14,7 +14,7 @@ class KuhnGame():
         random.shuffle(cards)
         print("You have: $" + str(bankroll))
         print("=============== Game start ===============\n"
-              " Your card is: " + (str(cards[0]) if go_first else str(cards[1])))
+              "Your card is: " + (str(cards[0]) if go_first else str(cards[1])))
         self.playAI(go_first, bankroll + self.gameRecursive(cards, '', go_first))
 
     def gameRecursive(self, cards: List[int], history: str, goFirst: bool) -> int:
@@ -82,5 +82,5 @@ class KuhnGame():
 
 if __name__ == '__main__':
     game = KuhnGame()
-    game.read('kt-200Mp')
     game.playAI(False, 0)
+

@@ -1,19 +1,21 @@
 import time
 from kuhn_game import KuhnGame
 from kuhn_test import KuhnTest
-from kuhn_trainer import train, continueTrain
+from kuhn_trainer import train, nodeMap
 
-# Train a game tree from scratch
-train(iterations=10 ** 6, saveName="kt-10M")
-# Continue training from a saved file
-# continueTrain('kt-10M', 90*10**6, 'kt-100M')
+# Train the game tree from scratch
+train(iterations=10**6, saveName="kt-10M")  # Training happens here
+
+# Initialize KuhnTest with the trained nodeMap
 kt = KuhnTest()
-kt.read(filepath="kt-10M")
-print(kt.gameValue())
+kt.nodeMap = nodeMap
 
-# Play against trained game tree
+# Evaluate the trained strategy
+print("Game value:", kt.gameValue())
+print("Exploitability:", kt.exploitability())
+
+# Play against the trained AI
 game = KuhnGame()
-game.read("kt-10M")
+game.AI = nodeMap  # Assign the trained strategy directly
 game.playAI(go_first=False, bankroll=0)
-# game.read(filepath="kt-200Mp")
-# game.playAI(goFirst=False, bankroll=0)
+
