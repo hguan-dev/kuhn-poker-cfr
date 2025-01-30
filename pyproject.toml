@@ -13,6 +13,7 @@ python = "^3.12"
 ruff = "^0.8.4"
 mypy = "^1.14.1"
 pytest = "^8.3.4"
+numpy = "^2.2.2"
 
 
 [build-system]

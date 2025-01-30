@@ -1,5 +1,6 @@
 import random
 from enum import Enum
+from cfr_trainer import CFRTrainer
 
 
 class Action(Enum):
@@ -15,14 +16,10 @@ class Card(Enum):
     K = 3
 
     def __lt__(self, o: object) -> bool:
-        if not isinstance(o, Card):
-            return NotImplemented
-        return self.value < o.value
+        return self.value < o.value if isinstance(o, Card) else NotImplemented
 
     def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Card):
-            return NotImplemented
-        return self.value == o.value
+        return self.value == o.value if isinstance(o, Card) else NotImplemented
 
     def __str__(self) -> str:
         return str(self.name)
@@ -30,10 +27,9 @@ class Card(Enum):
 
 class Deck:
     def __init__(self) -> None:
-        self.cards: None | list[Card] = None
+        self.cards = [Card.K, Card.Q, Card.J]
 
     def shuffle(self) -> None:
-        self.cards = [Card.K, Card.Q, Card.J]
         random.shuffle(self.cards)
 
     def draw(self) -> Card:
@@ -43,9 +39,10 @@ class Deck:
 
 
 class Player:
-    def __init__(self) -> None:
+    def __init__(self, trainer: CFRTrainer) -> None:
         self.score = 0
         self.card = Card.J
+        self.trainer = trainer
 
     def bet(self) -> None:
         self.score -= 1
@@ -56,11 +53,19 @@ class Player:
     def win(self, amount: int) -> None:
         self.score += amount
 
+    def choose_action(self, info_set: str) -> Action:
+        """
+        TODO: Implement CFR-based action selection.
+        Currently, this function chooses actions randomly.
+        """
+        return random.choice(list(Action))
+
 
 class Game:
     def __init__(self, ante_amount: int = 1) -> None:
         self.deck = Deck()
-        self.players = [Player(), Player()]
+        self.trainer = CFRTrainer()
+        self.players = [Player(self.trainer), Player(self.trainer)]
         self.pot = 0
         self.ante_amount = ante_amount
 
@@ -72,77 +77,51 @@ class Game:
             player.ante(self.ante_amount)
 
     def betting_round(self, player: Player, prev_action: Action) -> Action:
-        print(f"Player has {str(player.card)}")
-        if prev_action == Action.BET:
-            a = None
-            while a not in ["c", "f", "q"]:
-                a = input("Player action (call, fold): ")
-            if a == "c":
-                print("Player calls")
-                player.bet()
-                self.pot += 1
-                return Action.CALL
-            elif a == "f":
-                print("Player folds")
-                return Action.FOLD
-            else:
-                exit()
-        else:
-            a = None
-            while a not in ["c", "b", "q"]:
-                a = input("Player action (check, bet): ")
-            if a == "c":
-                print("Player checks")
-                return Action.CHECK
-            elif a == "b":
-                print("Player bets")
-                player.bet()
-                self.pot += 1
-                return Action.BET
-            else:
-                exit()
+        info_set = f"{player.card}_{prev_action}"
+        action = player.choose_action(info_set)
+        print(f"Player ({player.card}) chooses {action}")
+
+        if action == Action.BET or action == Action.CALL:
+            player.bet()
+            self.pot += 1
+        return action
 
     def play_round(self) -> None:
-        player_1 = self.players[0]
-        player_2 = self.players[1]
-        print("\n\nPlayer 1's turn!\n\n")
+        player_1, player_2 = self.players
+        print("\nPlayer 1's turn!\n")
         a = self.betting_round(player_1, Action.CHECK)
-        print("\n\nPlayer 2's turn!\n\n")
+        print("\nPlayer 2's turn!\n")
         a = self.betting_round(player_2, a)
+
         if a == Action.FOLD:
             player_1.win(self.pot)
-            print(f"\n\nPlayer 1 wins {self.pot}")
+            print(f"Player 1 wins {self.pot}")
             return
         elif a == Action.BET:
-            print("\n\nPlayer 1's turn!\n\n")
+            print("\nPlayer 1's turn!\n")
             a = self.betting_round(player_1, a)
             if a == Action.FOLD:
                 player_2.win(self.pot)
-                print(f"\n\nPlayer 2 wins {self.pot}")
+                print(f"Player 2 wins {self.pot}")
                 return
+
         if player_1.card > player_2.card:
             player_1.win(self.pot)
-            print(
-                f"\n\nPlayer 1 wins {self.pot} with {str(player_1.card)} over {str(player_2.card)}"
-            )
+            print(f"Player 1 wins {self.pot} with {player_1.card} over {player_2.card}")
         else:
             player_2.win(self.pot)
-            print(
-                f"\n\nPlayer 2 wins {self.pot} with {str(player_2.card)} over {str(player_1.card)}"
-            )
+            print(f"Player 2 wins {self.pot} with {player_2.card} over {player_1.card}")
 
     def start_game(self) -> None:
-        player_1 = self.players[0]
-        player_2 = self.players[1]
+        player_1, player_2 = self.players
         while True:
-            a = None
-            while a not in ["p", "s", "q"]:
-                a = input("\n\nPlay round (p), show stats (s), quit (q): ")
+            a = input("\n\nPlay round (p), show stats (s), quit (q): ").lower()
             if a == "q":
                 break
             elif a == "p":
                 self.init_round()
                 self.play_round()
             else:
-                print(f"\n\nPlayer 1 score: {player_1.score}")
-                print(f"Player 2 score: {player_2.score}\n\n")
+                print(f"\nPlayer 1 score: {player_1.score}")
+                print(f"Player 2 score: {player_2.score}\n")
+
