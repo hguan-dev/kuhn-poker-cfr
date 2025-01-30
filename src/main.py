@@ -1,16 +1,19 @@
-from engine import Game
+import time
+from kuhn_game import KuhnGame
+from kuhn_test import KuhnTest
+from kuhn_trainer import train, continueTrain
 
+# Train a game tree from scratch
+train(iterations=10 ** 6, saveName="kt-10M")
+# Continue training from a saved file
+# continueTrain('kt-10M', 90*10**6, 'kt-100M')
+kt = KuhnTest()
+kt.read(filepath="kt-10M")
+print(kt.gameValue())
 
-def main() -> None:
-    game = Game()
-    print("\nTraining CFR for 100,000 iterations...\n")
-    for _ in range(100000):  # Train CFR for 100,000 iterations
-        game.init_round()
-        game.play_round()
-
-    print("\nFinal Learned Strategies:")
-    for info_set, strategy in game.trainer.strategy_sum.items():
-        print(f"{info_set}: {game.trainer.get_average_strategy(info_set)}")
-
-if __name__ == "__main__":
-    main()
+# Play against trained game tree
+game = KuhnGame()
+game.read("kt-10M")
+game.playAI(go_first=False, bankroll=0)
+# game.read(filepath="kt-200Mp")
+# game.playAI(goFirst=False, bankroll=0)
