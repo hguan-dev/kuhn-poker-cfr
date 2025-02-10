@@ -89,7 +89,7 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     terminalNode = node.returnPayoff(cards) is not None 
 
     if terminalNode: 
-        return node.returnPayoff(cards)
+        return float(node.returnPayoff(cards))
 
     if infoSet not in nodeMap:
         node = KuhnNode()
@@ -101,7 +101,7 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     # TODO: Compute utilities for each action.
     util: List[float] = [0.0] * NUM_ACTIONS
     strategy = node.getStrategy(p0 if curr_player == 0 else p1)
-    nodeUtil = 0.0 #weighted average of the cfr of each branch
+    nodeUtil: float = 0.0 #weighted average of the cfr of each branch
 
     for a in range(NUM_ACTIONS): 
         nextHistory = history + ('p' if a == 0 else 'b')
@@ -115,7 +115,7 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     for a in range(NUM_ACTIONS):
         regret= util[a] - nodeUtil
         node.regretSum[a] += (p1 if curr_player == 0 else p0) * regret
-    return nodeUtil       
+    return float(nodeUtil)       
 
     pass
 
