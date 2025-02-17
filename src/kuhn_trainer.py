@@ -30,6 +30,7 @@ def train(iterations: int, saveName: str) -> None:
         iterations (int): The number of training iterations to run.
         saveName (str): The name of the file to save the trained model.
     """
+    t1 = time.time()
     cards: List[int] = [1, 2, 3]
 
     # TODO: Initialize utility tracking variables (e.g., total utility)
@@ -49,8 +50,11 @@ def train(iterations: int, saveName: str) -> None:
     #   - Calculate and display metrics like game value and exploitability
 
         if i % 100000 == 0:
+            if time.time() - t1 != 0.:
+                print(f"Trained {i} iterations. {str(100000 / (time.time() - t1))} iterations per second.")
             kt = KuhnTest()
             kt.nodeMap = nodeMap
+            t1 = time.time()
             print(f'Average game value: {kt.gameValue()}')
             print(f'Exploitability: {sum(kt.exploitability())}')
 
