@@ -31,6 +31,7 @@ def train(iterations: int, saveName: str) -> None:
         iterations (int): The number of training iterations to run.
         saveName (str): The name of the file to save the trained model.
     """
+    t1 = time.time()
     cards: List[int] = [1, 2, 3]
 
     # TODO: Initialize utility tracking variables (e.g., total utility)
@@ -50,8 +51,11 @@ def train(iterations: int, saveName: str) -> None:
         #   - Calculate and display metrics like game value and exploitability
 
         if i % 100000 == 0:
+            if time.time() - t1 != 0.:
+                print(f"Trained {i} iterations. {str(100000 / (time.time() - t1))} iterations per second.")
             kt = KuhnTest()
             kt.nodeMap = nodeMap
+            t1 = time.time()
             print(f"Average game value: {kt.gameValue()}")
             print(f"Exploitability: {sum(kt.exploitability())}")
 
@@ -103,7 +107,7 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     # TODO: Compute utilities for each action.
     util: List[float] = [0.0] * NUM_ACTIONS
     strategy = node.getStrategy(p0 if curr_player == 0 else p1)
-    nodeUtil = 0.0  # weighted average of the cfr of each branch
+    nodeUtil: float = 0.0  # weighted average of the cfr of each branch
 
     for a in range(NUM_ACTIONS):
         nextHistory = history + ("p" if a == 0 else "b")
@@ -117,7 +121,7 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
     for a in range(NUM_ACTIONS):
         regret = util[a] - nodeUtil
         node.regretSum[a] += (p1 if curr_player == 0 else p0) * regret
-    return nodeUtil
+    return float(nodeUtil)
 
     pass
 
