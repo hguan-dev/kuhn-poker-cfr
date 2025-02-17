@@ -59,7 +59,9 @@ class KuhnTest:
         if infoSet not in self.nodeMap:
             node = KuhnNode()
             node.infoSet = infoSet
-            return node.returnPayoff(cards)
+            payoff = node.returnPayoff(cards)
+            if payoff is not None: 
+                return float(payoff)
 
         # TODO 2: Determine the current player based on the length of the infoSet.
         #         Even number of actions -> player 1's turn, odd number -> player 2's turn.
@@ -166,17 +168,21 @@ class KuhnTest:
                             evNextNode = KuhnNode()
                             evNextNode.infoSet = card + history + next_move
                             evCurrNode = self.nodeMap[other + history]
-                            ev_temp += (
-                                reachProb[evRP]
-                                * evCurrNode.getAverageStrategy()[a]
-                                * (-evNextNode.returnPayoff(evCards))
-                            )
+                            payoff = evNextNode.returnPayoff(evCards)
+                            if payoff is not None: 
+                                ev_temp += (
+                                    reachProb[evRP]
+                                    * evCurrNode.getAverageStrategy()[a]
+                                    * (-1 * (payoff))
+                                )
                             npEV += reachProb[evRP]
                             brNextNode = KuhnNode()
                             brNextNode.infoSet = other + history + next_move
-                            br_temp += reachProb[brRP] * (
-                                -brNextNode.returnPayoff(brCards)
-                            )
+                            payoff = brNextNode.returnPayoff(brCards)
+                            if payoff is not None: 
+                                br_temp += reachProb[brRP] * (
+                                    -1 * payoff
+                                )
                             npBR += reachProb[brRP]
                         if npEV != 0:
                             ev_temp /= npEV
