@@ -70,7 +70,7 @@ class KuhnNode:
 
         return avgStrategy
 
-    def returnPayoff(self, cards: List[int]) -> Optional[int]:
+    def returnPayoff(self, cards: List[int]) -> Optional[float]:
         """
         Calculate the payoff for terminal states.
 
