@@ -2,7 +2,7 @@
 name = "kuhn-poker-cfr"
 version = "0.1.0"
 description = ""
-authors = ["Max Breslin <maxbreslin@u.northwestern.edu>", "Harry Guan"]
+authors = ["Max Breslin", "Harry Guan"]
 readme = "README.md"
 packages = [
   {include = "src"}
@@ -13,6 +13,7 @@ python = "^3.12"
 ruff = "^0.8.4"
 mypy = "^1.14.1"
 pytest = "^8.3.4"
+numpy = "^2.2.3"
 
 
 [build-system]

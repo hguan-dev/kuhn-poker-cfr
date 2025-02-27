@@ -1,124 +1,89 @@
 from typing import Dict, List
-import pickle
 import random
+from kuhn_cfr import KuhnCFR
+from kuhn_node import Node
 
 
 class KuhnGame:
-    AI: Dict
-
-    def read(self, filepath: str) -> None:
-        with open(filepath, "rb") as f:
-            self.AI = pickle.load(f)
+    def __init__(self, trained_cfr: KuhnCFR) -> None:
+        self.AI: Dict[str, Node] = trained_cfr.nodes
+        self.card_map = {0: "J", 1: "Q", 2: "K"}
 
     def playAI(self, go_first: bool, bankroll: int) -> None:
-        cards = [1, 2, 3]
-        random.shuffle(cards)
-        print("You have: $" + str(bankroll))
-        print(
-            "=============== Game start ===============\n"
-            "Your card is: " + (str(cards[0]) if go_first else str(cards[1]))
-        )
-        self.playAI(go_first, bankroll + self.gameRecursive(cards, "", go_first))
+        """Runs the game loop for AI vs Human"""
+        while True:
+            cards = [0, 1, 2]
+            random.shuffle(cards)
+            print(f"\nYou have: ${bankroll}")
+            print("=============== Game start ===============")
+            player_card = self.card_map[cards[0] if go_first else cards[1]]
+            print(f"Your card is: {player_card}")
 
-    def gameRecursive(self, cards: List[int], history: str, goFirst: bool) -> int:
+            game_result = self.gameRecursive(cards, "", go_first)
+            bankroll += game_result
+
+    def gameRecursive(self, cards: List[int], history: str, go_first: bool) -> int:
+        """Handles recursive game actions and AI logic"""
         players = ["You", "AI"]
         plays = len(history)
-        AI_turn = (plays % 2 == 1) if goFirst else plays % 2 == 0
+        AI_turn = (plays % 2 == 1) if go_first else (plays % 2 == 0)
         curr_player = plays % 2
-        opponent = 1 - curr_player
-        AI_card = str(cards[1]) if goFirst else str(cards[0])
-        # Return payoff for terminal states
+        AI_card = self.card_map[cards[1] if go_first else cards[0]]
+
         if plays > 1:
-            terminal_pass = history[plays - 1] == "p"
-            double_bet = history[plays - 2 : plays] == "bb"
-            is_player_card_higher = cards[curr_player] > cards[opponent]
+            terminal_pass = history[-1] == "p"
+            double_bet = history[-2:] == "bb"
+            player_card = cards[0] if go_first else cards[1]
+            ai_card = cards[1] if go_first else cards[0]
+            is_player_card_higher = player_card > ai_card
+
             if terminal_pass:
                 if history == "pp":
-                    if is_player_card_higher:
-                        print(
-                            "AI had card "
-                            + AI_card
-                            + ". Game ended with history: "
-                            + history
-                            + ".\n"
-                            + (players[1] if AI_turn else players[0])
-                            + " won $1."
-                        )
-                        return -1 if AI_turn else 1
-                    else:
-                        print(
-                            "AI had card "
-                            + AI_card
-                            + ". Game ended with history: "
-                            + history
-                            + ".\n"
-                            + (players[0] if goFirst else players[1])
-                            + " won $1."
-                        )
-                        return 1 if AI_turn else -1
-                # History is 'pbp' or 'bp'
-                else:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[1] if AI_turn else players[0])
-                        + " won $1."
-                    )
-                    return -1 if AI_turn else 1
-            # If terminal state does not end with pass it must be double bet.
-            # elif double_bet:
-            elif double_bet:
-                if is_player_card_higher:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[1] if AI_turn else players[0])
-                        + " won $2."
-                    )
-                    return -2 if AI_turn else 2
-                else:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[0] if AI_turn else players[1])
-                        + " won $2."
-                    )
-                    return 2 if AI_turn else -2
+                    winner = players[0] if is_player_card_higher else players[1]
+                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                    print(f"{winner} won $1.\n")
+                    return 1 if is_player_card_higher else -1
+
+                print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                print(f"{players[1] if history[-2] == 'b' else players[0]} won $1.\n")
+                return 1 if history[-2] == "b" else -1
+
+            if double_bet:
+                winner = players[0] if is_player_card_higher else players[1]
+                print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                print(f"{winner} won $2.\n")
+                return 2 if is_player_card_higher else -2
 
         info_set = str(cards[curr_player]) + history
-        # Keep playing if not terminal state
         if AI_turn:
-            AIStrategy = self.AI[info_set].getAverageStrategy()
-            r = random.random()
-            # AI passed
-            if r < AIStrategy[0]:
-                print("AI checked/passed.\n")
-                return self.gameRecursive(cards, history + "p", goFirst)
+            if info_set in self.AI:
+                AIStrategy = self.AI[info_set].get_average_strategy()
+                r = random.random()
+                if r < AIStrategy[0]:
+                    print("AI checked/passed.\n")
+                    return self.gameRecursive(cards, history + "p", go_first)
+                else:
+                    print("AI bet $1.\n")
+                    return self.gameRecursive(cards, history + "b", go_first)
             else:
-                print("AI bet $1.\n")
-                return self.gameRecursive(cards, history + "b", goFirst)
+                action = random.choice(["p", "b"])
+                print(f"AI {'checked/passed' if action == 'p' else 'bet $1'}.\n")
+                return self.gameRecursive(cards, history + action, go_first)
 
-        else:
-            bp = input("Your turn, enter 'b' for bet or 'p' for pass:\n")
-            if bp == "p":
-                print("You passed.\n")
-                return self.gameRecursive(cards, history + "p", goFirst)
-            elif bp == "b":
-                print("You bet $1.\n")
-                return self.gameRecursive(cards, history + "b", goFirst)
-            else:
-                return self.gameRecursive(cards, history, goFirst)
+        while True:
+            action = input("Your turn. Enter 'p' for pass/check, 'b' for bet:\n").strip().lower()
+            if action in ["p", "b"]:
+                break
+            print("Invalid input. Please enter 'p' or 'b'.")
+
+        print(f"You {'passed' if action == 'p' else 'bet $1'}.\n")
+        return self.gameRecursive(cards, history + action, go_first)
+
 
 
 if __name__ == "__main__":
-    game = KuhnGame()
-    game.playAI(False, 0)
+    cfr = KuhnCFR(100000, 3)
+    cfr.cfr_iterations_external()
+    game = KuhnGame(cfr)
+    game.playAI(go_first=False, bankroll=0)
+
