@@ -71,7 +71,11 @@ class KuhnGame:
                 return self.gameRecursive(cards, history + action, go_first)
 
         while True:
-            action = input("Your turn. Enter 'p' for pass/check, 'b' for bet:\n").strip().lower()
+            action = (
+                input("Your turn. Enter 'p' for pass/check, 'b' for bet:\n")
+                .strip()
+                .lower()
+            )
             if action in ["p", "b"]:
                 break
             print("Invalid input. Please enter 'p' or 'b'.")
@@ -80,10 +84,8 @@ class KuhnGame:
         return self.gameRecursive(cards, history + action, go_first)
 
 
-
 if __name__ == "__main__":
     cfr = KuhnCFR(100000, 3)
     cfr.cfr_iterations_external()
     game = KuhnGame(cfr)
     game.playAI(go_first=False, bankroll=0)
-
