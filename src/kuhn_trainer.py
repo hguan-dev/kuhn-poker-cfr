@@ -123,8 +123,6 @@ def cfr(cards: List[int], history: str, p0: float, p1: float) -> float:
         node.regretSum[a] += (p1 if curr_player == 0 else p0) * regret
     return float(nodeUtil)
 
-    pass
-
 
 if __name__ == "__main__":
     start_time: float = time.time()
