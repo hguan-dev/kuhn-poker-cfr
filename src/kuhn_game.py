@@ -44,23 +44,16 @@ class KuhnGame:
 
             if terminal_pass:
                 if history == "pp":
-                    winner = players[0] if is_player_card_higher else players[1]
-                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
-                    print(f"{winner} won $1.\n")
-                    return 1 if is_player_card_higher else -1
-
-                if history[-2] == "b":
-                    betting_player = (len(history) - 2) % 2
-                    winner = players[betting_player]
-                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
-                    print(f"{winner} won $1.\n")
-                    return 1 if winner == "You" else -1
+                    winner_idx = 0 if is_player_card_higher else 1
                 else:
-                    winner_idx = curr_player
-                    winner = players[winner_idx]
-                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
-                    print(f"{winner} won $1.\n")
-                    return 1 if winner == "You" else -1
+                    last_bet_position = history.rfind("b")
+                    bettor_idx = last_bet_position % 2
+                    winner_idx = bettor_idx
+
+                winner = players[winner_idx]
+                print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                print(f"{winner} won $1.\n")
+                return 1 if winner_idx == 0 else -1
 
             if double_bet:
                 winner = players[0] if is_player_card_higher else players[1]
