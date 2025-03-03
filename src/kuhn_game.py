@@ -14,13 +14,18 @@ class KuhnGame:
         while True:
             cards = [0, 1, 2]
             random.shuffle(cards)
-            print(f"\nYou have: ${bankroll}")
+            if bankroll < 0:
+                print(f"\nYou have: - ${0 - bankroll}")
+            else: 
+                print(f"\nYou have: ${bankroll}")
             print("=============== Game start ===============")
             player_card = self.card_map[cards[0] if go_first else cards[1]]
             print(f"Your card is: {player_card}")
 
             game_result = self.gameRecursive(cards, "", go_first)
             bankroll += game_result
+
+            go_first = not go_first
 
     def gameRecursive(self, cards: List[int], history: str, go_first: bool) -> int:
         """Handles recursive game actions and AI logic"""
@@ -44,9 +49,18 @@ class KuhnGame:
                     print(f"{winner} won $1.\n")
                     return 1 if is_player_card_higher else -1
 
-                print(f"AI had card {AI_card}. Game ended with history: {history}.")
-                print(f"{players[1] if history[-2] == 'b' else players[0]} won $1.\n")
-                return 1 if history[-2] == "b" else -1
+                if history[-2] == 'b':
+                    betting_player = (len(history) - 2) % 2 
+                    winner = players[betting_player]
+                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                    print(f"{winner} won $1.\n")
+                    return 1 if winner == "You" else -1
+                else:
+                    winner_idx = curr_player
+                    winner = players[winner_idx]
+                    print(f"AI had card {AI_card}. Game ended with history: {history}.")
+                    print(f"{winner} won $1.\n")
+                    return 1 if winner == "You" else -1
 
             if double_bet:
                 winner = players[0] if is_player_card_higher else players[1]
