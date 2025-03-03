@@ -16,7 +16,7 @@ class KuhnGame:
             random.shuffle(cards)
             if bankroll < 0:
                 print(f"\nYou have: - ${0 - bankroll}")
-            else: 
+            else:
                 print(f"\nYou have: ${bankroll}")
             print("=============== Game start ===============")
             player_card = self.card_map[cards[0] if go_first else cards[1]]
@@ -49,8 +49,8 @@ class KuhnGame:
                     print(f"{winner} won $1.\n")
                     return 1 if is_player_card_higher else -1
 
-                if history[-2] == 'b':
-                    betting_player = (len(history) - 2) % 2 
+                if history[-2] == "b":
+                    betting_player = (len(history) - 2) % 2
                     winner = players[betting_player]
                     print(f"AI had card {AI_card}. Game ended with history: {history}.")
                     print(f"{winner} won $1.\n")
