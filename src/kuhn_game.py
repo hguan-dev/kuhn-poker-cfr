@@ -48,7 +48,7 @@ class KuhnGame:
                 else:
                     last_bet_position = history.rfind("b")
                     bettor_idx = last_bet_position % 2
-                    winner_idx = bettor_idx
+                    winner_idx = 1 - bettor_idx
 
                 winner = players[winner_idx]
                 print(f"AI had card {AI_card}. Game ended with history: {history}.")
