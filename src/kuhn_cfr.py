@@ -61,7 +61,7 @@ class KuhnCFR:
                     return -1.0
             if (history[-1] == 0 and history[-2] == 0) or (
                 history[-1] == 1 and history[-2] == 1
-            ):  # check check or bet call, showdown
+            ):
                 if acting_player == traversing_player:
                     if cards[acting_player] > cards[opponent_player]:
                         return pot / 2.0
