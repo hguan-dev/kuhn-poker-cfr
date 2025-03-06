@@ -3,11 +3,12 @@ from typing import Dict
 from kuhn_cfr import KuhnCFR
 from kuhn_node import Node
 
+
 class KuhnGame:
     def __init__(self, trained_cfr: KuhnCFR) -> None:
         self.AI: Dict[str, Node] = trained_cfr.nodes
         self.card_map = {0: "J", 1: "Q", 2: "K"}
-    
+
     def playAI(self, go_first: bool, bankroll: int) -> None:
         """Play successive rounds until the human runs out of money."""
         while bankroll > 0:
@@ -18,19 +19,19 @@ class KuhnGame:
                 human_card, ai_card = cards[0], cards[1]
             else:
                 ai_card, human_card = cards[0], cards[1]
-            
+
             print("\n=============== New Round ===============")
             print(f"You have: ${bankroll}")
             print(f"Your card is: {self.card_map[human_card]}")
-            
+
             # Play a round and get the net outcome.
             outcome = self.playRound(go_first, human_card, ai_card)
             bankroll += outcome
-            
+
             print(f"New bankroll: ${bankroll}")
             go_first = not go_first  # alternate who goes first
         print("Game over. You're broke.")
-    
+
     def playRound(self, go_first: bool, human_card: int, ai_card: int) -> int:
         """
         Plays one round in a linear, nonrecursive manner.
@@ -71,7 +72,9 @@ class KuhnGame:
                 else:
                     print("AI bets.")
                     # Now human responds in active mode.
-                    action2 = input("Enter 'p' to fold, or 'b' to call: ").strip().lower()
+                    action2 = (
+                        input("Enter 'p' to fold, or 'b' to call: ").strip().lower()
+                    )
                     if action2 not in ["p", "b"]:
                         print("Invalid input, defaulting to 'b'.")
                         action2 = "b"
@@ -113,7 +116,9 @@ class KuhnGame:
                 else:
                     print("You bet.")
                     # Now AI responds in active mode.
-                    ai_response = self.getAIAction(ai_card, history="p" + "b", active=True)
+                    ai_response = self.getAIAction(
+                        ai_card, history="p" + "b", active=True
+                    )
                     if ai_response == "p":
                         print("AI folds.")
                         return 1
@@ -138,9 +143,9 @@ class KuhnGame:
         else:
             return random.choice(["p", "b"])
 
+
 if __name__ == "__main__":
     cfr = KuhnCFR(100000, 3)
     cfr.cfr_iterations_external()
     game = KuhnGame(cfr)
     game.playAI(go_first=False, bankroll=10)
-
