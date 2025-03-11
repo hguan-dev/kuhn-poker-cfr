@@ -7,7 +7,7 @@ install:
 	poetry install
 
 test: install
-	@poetry run pytest $(SRC)/test/unit
+	@PYTHONPATH=src poetry run pytest
 
 lint:
 	poetry run mypy $(SRC)

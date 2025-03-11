@@ -3,6 +3,7 @@ from typing import Dict
 from kuhn_cfr import KuhnCFR
 from kuhn_node import Node
 
+
 class KuhnGame:
     def __init__(self, trained_cfr: KuhnCFR) -> None:
         self.AI: Dict[str, Node] = trained_cfr.nodes
@@ -98,9 +99,7 @@ class KuhnGame:
                     return 1 if human_card > ai_card else -1
                 else:
                     print("You bet.")
-                    ai_response = self.getAIAction(
-                        ai_card, history="p" + "b"
-                    )
+                    ai_response = self.getAIAction(ai_card, history="p" + "b")
                     if ai_response == "p":
                         print("AI folds.")
                         return 1
@@ -117,10 +116,12 @@ class KuhnGame:
         history_numeric = "".join(["0" if h == "p" else "1" for h in history])
 
         # Format history as [0,1] to match CFR training output
-        formatted_history = f"[{', '.join(history_numeric)}]" if history_numeric else "[]"
-        
+        formatted_history = (
+            f"[{', '.join(history_numeric)}]" if history_numeric else "[]"
+        )
+
         info_set = f"{ai_card}{formatted_history}"
-        
+
         print(f"\n[DEBUG] AI looking up info_set: '{info_set}'")
 
         if len(self.AI) < 50:  # Avoid excessive prints
@@ -132,8 +133,11 @@ class KuhnGame:
             r = random.random()
             return "p" if r < strat[0] else "b"
         else:
-            print(f"[DEBUG] ERROR: info_set '{info_set}' NOT FOUND! Falling back to random choice.")
+            print(
+                f"[DEBUG] ERROR: info_set '{info_set}' NOT FOUND! Falling back to random choice."
+            )
             return random.choice(["p", "b"])
+
 
 if __name__ == "__main__":
     cfr = KuhnCFR(100000, 3)

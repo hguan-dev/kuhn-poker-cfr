@@ -3,6 +3,7 @@ import random
 from kuhn_node import Node
 from typing import List, Dict
 
+
 class KuhnCFR:
     def __init__(self, iterations: int, decksize: int) -> None:
         self.iterations: int = iterations

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Node:
     def __init__(self, num_actions: int) -> None:
         self.regret_sum: np.ndarray = np.zeros(num_actions)
