@@ -122,20 +122,11 @@ class KuhnGame:
 
         info_set = f"{ai_card}{formatted_history}"
 
-        print(f"\n[DEBUG] AI looking up info_set: '{info_set}'")
-
-        if len(self.AI) < 50:  # Avoid excessive prints
-            print("[DEBUG] Available AI strategy info_sets:", list(self.AI.keys()))
-
         if info_set in self.AI:
             strat = self.AI[info_set].get_average_strategy()
-            print(f"[DEBUG] Strategy found: {strat}")
             r = random.random()
             return "p" if r < strat[0] else "b"
         else:
-            print(
-                f"[DEBUG] ERROR: info_set '{info_set}' NOT FOUND! Falling back to random choice."
-            )
             return random.choice(["p", "b"])
 
 
