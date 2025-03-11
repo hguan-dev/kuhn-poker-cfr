@@ -1,21 +1,23 @@
-[tool.poetry]
+[project]
 name = "kuhn-poker-cfr"
 version = "0.1.0"
-description = ""
-authors = ["Max Breslin", "Harry Guan"]
-readme = "README.md"
-packages = [
-  {include = "src"}
+description = "This project implements the Counterfactual Regret Minimization (CFR) algorithm in Python to find Nash equilibria in Kuhn Poker. Using iterative self-play, the algorithm minimizes regret over multiple training iterations to compute a near-optimal strategy."
+authors = [
+    { name = "Harry Guan" },
+    { name = "Anna Zhao" },
+    { name = "Max Breslin" },
+    { name = "Shun Fujita" }
 ]
-
-[tool.poetry.dependencies]
-python = "^3.12"
-ruff = "^0.8.4"
-mypy = "^1.14.1"
-pytest = "^8.3.4"
-numpy = "^2.2.3"
-
+readme = "README.md"
+dependencies = [
+    "python>=3.12",
+    "ruff>=0.8.4",
+    "mypy>=1.14.1",
+    "pytest>=8.3.4",
+    "numpy>=2.2.3"
+]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
