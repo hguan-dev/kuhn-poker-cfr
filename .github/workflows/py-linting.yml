@@ -1,4 +1,4 @@
-name: CI - Python Linting and Formatting
+name: CI - Python Linting
 
 on:
     push:
@@ -28,4 +28,3 @@ jobs:
         - name: Run ruff and mypy
           run: |
             make lint
-            make format
