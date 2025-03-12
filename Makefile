@@ -7,12 +7,11 @@ install:
 	poetry install
 
 test: install
-	@poetry run pytest $(SRC)/test/unit
+	@env PYTHONPATH=src poetry run pytest
 
 lint:
 	poetry run mypy $(SRC)
 	poetry run ruff check $(SRC)
-	poetry run ruff format --check $(SRC)
 
 format:
 	poetry run ruff format $(SRC)

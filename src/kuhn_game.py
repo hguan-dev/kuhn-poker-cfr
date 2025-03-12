@@ -1,124 +1,137 @@
-from typing import Dict, List
-import pickle
 import random
+from typing import Dict
+from kuhn_cfr import KuhnCFR
+from kuhn_node import Node
 
 
 class KuhnGame:
-    AI: Dict
-
-    def read(self, filepath: str) -> None:
-        with open(filepath, "rb") as f:
-            self.AI = pickle.load(f)
+    def __init__(self, trained_cfr: KuhnCFR) -> None:
+        self.AI: Dict[str, Node] = trained_cfr.nodes
+        self.card_map = {0: "J", 1: "Q", 2: "K"}
 
     def playAI(self, go_first: bool, bankroll: int) -> None:
-        cards = [1, 2, 3]
-        random.shuffle(cards)
-        print("You have: $" + str(bankroll))
-        print(
-            "=============== Game start ===============\n"
-            "Your card is: " + (str(cards[0]) if go_first else str(cards[1]))
-        )
-        self.playAI(go_first, bankroll + self.gameRecursive(cards, "", go_first))
+        """Play successive rounds until the human runs out of money."""
+        while bankroll > 0:
+            # Shuffle and deal cards.
+            cards = [0, 1, 2]
+            random.shuffle(cards)
+            if go_first:
+                human_card, ai_card = cards[0], cards[1]
+            else:
+                ai_card, human_card = cards[0], cards[1]
 
-    def gameRecursive(self, cards: List[int], history: str, goFirst: bool) -> int:
-        players = ["You", "AI"]
-        plays = len(history)
-        AI_turn = (plays % 2 == 1) if goFirst else plays % 2 == 0
-        curr_player = plays % 2
-        opponent = 1 - curr_player
-        AI_card = str(cards[1]) if goFirst else str(cards[0])
-        # Return payoff for terminal states
-        if plays > 1:
-            terminal_pass = history[plays - 1] == "p"
-            double_bet = history[plays - 2 : plays] == "bb"
-            is_player_card_higher = cards[curr_player] > cards[opponent]
-            if terminal_pass:
-                if history == "pp":
-                    if is_player_card_higher:
-                        print(
-                            "AI had card "
-                            + AI_card
-                            + ". Game ended with history: "
-                            + history
-                            + ".\n"
-                            + (players[1] if AI_turn else players[0])
-                            + " won $1."
-                        )
-                        return -1 if AI_turn else 1
+            print("\n=============== New Round ===============")
+            print(f"You have: ${bankroll}")
+            print(f"Your card is: {self.card_map[human_card]}")
+
+            outcome = self.playRound(go_first, human_card, ai_card)
+            bankroll += outcome
+
+            print(f"New bankroll: ${bankroll}")
+            go_first = not go_first
+        print("Game over. You're broke.")
+
+    def playRound(self, go_first: bool, human_card: int, ai_card: int) -> int:
+        """
+        Plays one round in a linear, nonrecursive manner.
+        Returns the net change to the human’s bankroll:
+          +1 for winning a fold,
+          +1 for winning a check–showdown,
+          +2 for winning a bet–call showdown,
+          or the negative of those amounts if losing.
+        """
+        if go_first:
+            action1 = input("Enter 'p' to check, or 'b' to bet: ").strip().lower()
+            if action1 not in ["p", "b"]:
+                print("Invalid input, defaulting to 'p'.")
+                action1 = "p"
+            if action1 == "b":
+                ai_action = self.getAIAction(ai_card, history="b")
+                if ai_action == "p":
+                    print("AI folds.")
+                    return 1
+                else:
+                    print("AI calls.")
+                    print("AI had:", self.card_map[ai_card])
+                    return 2 if human_card > ai_card else -2
+            else:
+                ai_action = self.getAIAction(ai_card, history="p")
+                if ai_action == "p":
+                    print("AI checks.")
+                    print("AI had:", self.card_map[ai_card])
+                    return 1 if human_card > ai_card else -1
+                else:
+                    print("AI bets.")
+                    action2 = (
+                        input("Enter 'p' to fold, or 'b' to call: ").strip().lower()
+                    )
+                    if action2 not in ["p", "b"]:
+                        print("Invalid input, defaulting to 'b'.")
+                        action2 = "b"
+                    if action2 == "p":
+                        print("You fold.")
+                        return -1
                     else:
-                        print(
-                            "AI had card "
-                            + AI_card
-                            + ". Game ended with history: "
-                            + history
-                            + ".\n"
-                            + (players[0] if goFirst else players[1])
-                            + " won $1."
-                        )
-                        return 1 if AI_turn else -1
-                # History is 'pbp' or 'bp'
-                else:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[1] if AI_turn else players[0])
-                        + " won $1."
-                    )
-                    return -1 if AI_turn else 1
-            # If terminal state does not end with pass it must be double bet.
-            # elif double_bet:
-            elif double_bet:
-                if is_player_card_higher:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[1] if AI_turn else players[0])
-                        + " won $2."
-                    )
-                    return -2 if AI_turn else 2
-                else:
-                    print(
-                        "AI had card "
-                        + AI_card
-                        + ". Game ended with history: "
-                        + history
-                        + ".\n"
-                        + (players[0] if AI_turn else players[1])
-                        + " won $2."
-                    )
-                    return 2 if AI_turn else -2
-
-        info_set = str(cards[curr_player]) + history
-        # Keep playing if not terminal state
-        if AI_turn:
-            AIStrategy = self.AI[info_set].getAverageStrategy()
-            r = random.random()
-            # AI passed
-            if r < AIStrategy[0]:
-                print("AI checked/passed.\n")
-                return self.gameRecursive(cards, history + "p", goFirst)
-            else:
-                print("AI bet $1.\n")
-                return self.gameRecursive(cards, history + "b", goFirst)
-
+                        print("AI had:", self.card_map[ai_card])
+                        return 2 if human_card > ai_card else -2
         else:
-            bp = input("Your turn, enter 'b' for bet or 'p' for pass:\n")
-            if bp == "p":
-                print("You passed.\n")
-                return self.gameRecursive(cards, history + "p", goFirst)
-            elif bp == "b":
-                print("You bet $1.\n")
-                return self.gameRecursive(cards, history + "b", goFirst)
+            ai_action = self.getAIAction(ai_card, history="")
+            if ai_action == "b":
+                print("AI bets.")
+                action1 = input("Enter 'p' to fold, or 'b' to call: ").strip().lower()
+                if action1 not in ["p", "b"]:
+                    print("Invalid input, defaulting to 'b'.")
+                    action1 = "b"
+                if action1 == "p":
+                    print("You fold.")
+                    return -1
+                else:
+                    print("AI had:", self.card_map[ai_card])
+                    return 2 if human_card > ai_card else -2
             else:
-                return self.gameRecursive(cards, history, goFirst)
+                print("AI checks.")
+                action1 = input("Enter 'p' to check, or 'b' to bet: ").strip().lower()
+                if action1 not in ["p", "b"]:
+                    print("Invalid input, defaulting to 'p'.")
+                    action1 = "p"
+                if action1 == "p":
+                    print("AI had:", self.card_map[ai_card])
+                    return 1 if human_card > ai_card else -1
+                else:
+                    print("You bet.")
+                    ai_response = self.getAIAction(ai_card, history="p" + "b")
+                    if ai_response == "p":
+                        print("AI folds.")
+                        return 1
+                    else:
+                        print("AI calls.")
+                        print("AI had:", self.card_map[ai_card])
+                        return 2 if human_card > ai_card else -2
+
+    def getAIAction(self, ai_card: int, history: str) -> str:
+        """
+        Determines AI's action using its CFR strategy.
+        """
+        # Convert 'p' -> '0' and 'b' -> '1' to match CFR format
+        history_numeric = "".join(["0" if h == "p" else "1" for h in history])
+
+        # Format history as [0,1] to match CFR training output
+        formatted_history = (
+            f"[{', '.join(history_numeric)}]" if history_numeric else "[]"
+        )
+
+        info_set = f"{ai_card}{formatted_history}"
+
+        if info_set in self.AI:
+            strat = self.AI[info_set].get_average_strategy()
+            r = random.random()
+            return "p" if r < strat[0] else "b"
+        else:
+            return random.choice(["p", "b"])
 
 
 if __name__ == "__main__":
-    game = KuhnGame()
-    game.playAI(False, 0)
+    cfr = KuhnCFR(100000, 3)
+    cfr.cfr_iterations_external()
+    game = KuhnGame(cfr)
+    game.playAI(go_first=False, bankroll=10)
