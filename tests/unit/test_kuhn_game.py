@@ -21,7 +21,7 @@ class TestKuhnGame(unittest.TestCase):
         action = self.game.getAIAction(ai_card, history)
         self.assertIn(action, ["p", "b"], "AI action should be 'p' or 'b'")
 
-    @patch("builtins.input", side_effect=["p"])  # Human checks
+    @patch("builtins.input", side_effect=["p", "p"])  # Human checks
     def test_play_round_human_checks(self, _mock_input: MagicMock) -> None:
         """Test a round where the human checks."""
         human_card, ai_card = 1, 2  # Q vs K
