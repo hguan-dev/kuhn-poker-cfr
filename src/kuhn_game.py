@@ -84,6 +84,7 @@ class KuhnGame:
                     action1 = "b"
                 if action1 == "p":
                     print("You fold.")
+                    print("AI had:", self.card_map[ai_card])
                     return -1
                 else:
                     print("AI had:", self.card_map[ai_card])
